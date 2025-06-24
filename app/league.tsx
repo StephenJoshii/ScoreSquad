@@ -89,12 +89,36 @@ const LeagueScreen = () => {
     Alert.alert('Your Predictions Submitted!', summary, [{ text: 'OK' }]);
   };
 
-  // handle loading state
-  if (loading) {
-    return <ActivityIndicator size="large" style={styles.loader} />;
-  }
+  // Renders the main content, either the list or the empty state message
+  const renderContent = () => {
+    if (loading) {
+      return <ActivityIndicator size="large" style={styles.loader} />;
+    }
 
-  // my UI
+    if (matches.length === 0) {
+      // This is our new "empty state" UI
+      return (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No matches found for this date.</Text>
+        </View>
+      );
+    }
+
+    return (
+      <FlatList
+        data={matches}
+        renderItem={({ item }) => (
+          <MatchCard
+            match={item}
+            onSelect={handlePrediction}
+            selected={predictions[item.id]}
+          />
+        )}
+        keyExtractor={(item) => item.id}
+      />
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: 'Matches' }} />
@@ -110,17 +134,8 @@ const LeagueScreen = () => {
         </Pressable>
       </View>
 
-      <FlatList
-        data={matches}
-        renderItem={({ item }) => (
-          <MatchCard
-            match={item}
-            onSelect={handlePrediction}
-            selected={predictions[item.id]}
-          />
-        )}
-        keyExtractor={(item) => item.id}
-      />
+      {/* This now calls our new renderContent function */}
+      <View style={styles.listContainer}>{renderContent()}</View>
 
       <Pressable style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitButtonText}>Submit Predictions</Text>
@@ -133,18 +148,33 @@ const LeagueScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f8f8f8', // added a light background color
   },
   loader: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // new style for the empty state
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#888',
+  },
+  listContainer: {
+    flex: 1, // ensures the list or empty message takes up the available space
+  },
   dateSelector: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 15,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: 'white',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
