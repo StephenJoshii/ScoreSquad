@@ -11,21 +11,26 @@ import {
   Text,
   View,
 } from 'react-native';
+// for formatting dates
+import { addDays, format, subDays } from 'date-fns';
 
-import MatchCard, { Match } from '../components/MatchCard'; // Import the Match type
+import MatchCard, { Match } from '../components/MatchCard';
 import { fetchMatches } from '../services/api';
 
 const LeagueScreen = () => {
-  // We now use the Match type from MatchCard to keep things consistent
+  // component states
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [predictions, setPredictions] = useState<Record<string, string>>({});
+  const [currentDate, setCurrentDate] = useState(new Date());
 
+  // fetch matches when the date changes
   useEffect(() => {
+    setLoading(true);
     const getMatches = async () => {
-      const matchData = await fetchMatches();
+      const dateString = format(currentDate, 'yyyy-MM-dd');
+      const matchData = await fetchMatches(dateString);
 
-      // The shape of this object now includes logos and status
       const formattedData = matchData.map((match: any) => ({
         id: match.fixture.id.toString(),
         status: match.fixture.status.short,
@@ -44,14 +49,22 @@ const LeagueScreen = () => {
     };
 
     getMatches();
-  }, []);
+  }, [currentDate]);
 
-  // ... (handlePrediction and handleSubmit functions remain the same)
+  // my helper functions
   const handlePrediction = (matchId: string, selection: string) => {
     setPredictions((prev) => ({
       ...prev,
       [matchId]: selection,
     }));
+  };
+
+  const goToNextDay = () => {
+    setCurrentDate((prevDate) => addDays(prevDate, 1));
+  };
+
+  const goToPreviousDay = () => {
+    setCurrentDate((prevDate) => subDays(prevDate, 1));
   };
 
   const handleSubmit = () => {
@@ -76,13 +89,26 @@ const LeagueScreen = () => {
     Alert.alert('Your Predictions Submitted!', summary, [{ text: 'OK' }]);
   };
 
+  // handle loading state
   if (loading) {
     return <ActivityIndicator size="large" style={styles.loader} />;
   }
 
+  // my UI
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ title: 'Todays Matches' }} />
+      <Stack.Screen options={{ title: 'Matches' }} />
+
+      {/* date nav buttons */}
+      <View style={styles.dateSelector}>
+        <Pressable onPress={goToPreviousDay}>
+          <Text style={styles.dateButton}>{'< Prev'}</Text>
+        </Pressable>
+        <Text style={styles.dateText}>{format(currentDate, 'd MMMM, yyyy')}</Text>
+        <Pressable onPress={goToNextDay}>
+          <Text style={styles.dateButton}>{'Next >'}</Text>
+        </Pressable>
+      </View>
 
       <FlatList
         data={matches}
@@ -103,13 +129,33 @@ const LeagueScreen = () => {
   );
 };
 
-// ... (styles remain the same)
+// styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
   loader: {
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dateSelector: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    backgroundColor: '#f8f8f8',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  dateButton: {
+    fontSize: 16,
+    color: 'royalblue',
+    fontWeight: 'bold',
+  },
+  dateText: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   submitButton: {
     backgroundColor: 'green',
@@ -123,6 +169,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-
 
 export default LeagueScreen;
