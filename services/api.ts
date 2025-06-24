@@ -4,12 +4,12 @@ const API_KEY = process.env.EXPO_PUBLIC_API_FOOTBALL_KEY as string;
 const API_HOST = 'v3.football.api-sports.io';
 
 export const fetchMatches = async () => {
-  console.log('Fetching matches from API...');
+  console.log('Fetching matches from API for a specific date...');
 
   try {
-    // UPDATED URL: Changed from Premier League to Brazilian Serie A
+    // UPDATED URL: Changed to fetch all games on a specific date
     const response = await fetch(
-      `https://v3.football.api-sports.io/fixtures?league=71&season=2025`, // Brazilian Serie A
+      `https://v3.football.api-sports.io/fixtures?date=2025-06-24`,
       {
         method: 'GET',
         headers: {

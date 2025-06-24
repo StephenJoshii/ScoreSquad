@@ -1,45 +1,68 @@
 // components/MatchCard.tsx
 
-import React, { useState } from 'react'; // import useState
-import { Pressable, StyleSheet, Text, View } from 'react-native'; // import Pressable
-import { Match } from '../constants/data';
+import React from 'react';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native'; // Import Image
+
+// Define the shape of our match data right here
+export type Match = {
+  id: string;
+  status: string;
+  teamA: {
+    name: string;
+    logo: string;
+  };
+  teamB: {
+    name: string;
+    logo: string;
+  };
+};
 
 type MatchCardProps = {
   match: Match;
+  selected: string;
+  onSelect: (matchId: string, selection: string) => void;
 };
 
-const MatchCard = ({ match }: MatchCardProps) => {
-  // state to remember which team is selected. 'teamA', 'teamB', or 'draw'
-  const [selected, setSelected] = useState('');
-
+const MatchCard = ({ match, selected, onSelect }: MatchCardProps) => {
   return (
     <View style={styles.card}>
-      {/* Top section with team names */}
+      {/* Top section with team names and logos */}
       <View style={styles.teamsContainer}>
-        <Text style={styles.teamName}>{match.teamA.name}</Text>
-        <Text style={styles.vsText}>VS</Text>
-        <Text style={styles.teamName}>{match.teamB.name}</Text>
+        {/* Team A */}
+        <View style={styles.team}>
+          <Image source={{ uri: match.teamA.logo }} style={styles.logo} />
+          <Text style={styles.teamName}>{match.teamA.name}</Text>
+        </View>
+
+        {/* Match Status */}
+        <View style={styles.statusContainer}>
+          <Text style={styles.statusText}>{match.status}</Text>
+        </View>
+
+        {/* Team B */}
+        <View style={styles.team}>
+          <Image source={{ uri: match.teamB.logo }} style={styles.logo} />
+          <Text style={styles.teamName}>{match.teamB.name}</Text>
+        </View>
       </View>
 
       {/* Bottom section with prediction buttons */}
       <View style={styles.predictionContainer}>
         <Pressable
           style={[styles.button, selected === 'teamA' && styles.selectedButton]}
-          onPress={() => setSelected('teamA')}
+          onPress={() => onSelect(match.id, 'teamA')}
         >
           <Text style={styles.buttonText}>Win</Text>
         </Pressable>
-
         <Pressable
           style={[styles.button, selected === 'draw' && styles.selectedButton]}
-          onPress={() => setSelected('draw')}
+          onPress={() => onSelect(match.id, 'draw')}
         >
           <Text style={styles.buttonText}>Draw</Text>
         </Pressable>
-
         <Pressable
           style={[styles.button, selected === 'teamB' && styles.selectedButton]}
-          onPress={() => setSelected('teamB')}
+          onPress={() => onSelect(match.id, 'teamB')}
         >
           <Text style={styles.buttonText}>Win</Text>
         </Pressable>
@@ -48,7 +71,7 @@ const MatchCard = ({ match }: MatchCardProps) => {
   );
 };
 
-// My styles for this component
+// Styles for the card, with new styles for logo, etc.
 const styles = StyleSheet.create({
   card: {
     backgroundColor: 'white',
@@ -68,17 +91,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
-  teamName: {
-    fontSize: 16,
-    fontWeight: '600',
+  team: {
     flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: 5,
+  },
+  logo: {
+    width: 40,
+    height: 40,
+    marginBottom: 8,
+  },
+  teamName: {
+    fontSize: 12,
+    fontWeight: '600',
     textAlign: 'center',
   },
-  vsText: {
-    fontSize: 12,
+  statusContainer: {
+    alignItems: 'center',
+  },
+  statusText: {
+    fontSize: 14,
     fontWeight: 'bold',
-    color: '#888',
-    marginHorizontal: 10,
+    color: '#333',
   },
   predictionContainer: {
     flexDirection: 'row',
@@ -100,9 +134,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'royalblue',
     fontWeight: 'bold',
-    // a little trick to make text color change when button is selected
-    // but the Pressable's style prop can't affect its children directly,
-    // so we'll handle this differently later if needed. For now, it's fine.
   },
 });
 

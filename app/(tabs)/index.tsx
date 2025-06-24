@@ -12,7 +12,7 @@ const HomeScreen = () => {
 
       {/* Link to the league screen */}
       <Link href="/league" style={styles.linkButton}>
-        <Text style={styles.linkText}>View This Week's League</Text>
+        <Text style={styles.linkText}>View This Weeks League</Text>
       </Link>
     </View>
   );
