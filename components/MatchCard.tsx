@@ -3,11 +3,15 @@
 import React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
-// This 'type' defines the "contract" for what a Match object looks like.
-// We export it so other files, like league.tsx, can use it too.
+// Updated the Match type to include league info
 export type Match = {
   id: string;
   status: string;
+  league: {
+    id: number;
+    name: string;
+    logo: string;
+  };
   teamA: {
     name: string;
     logo: string;
@@ -18,24 +22,22 @@ export type Match = {
   };
 };
 
-// This 'type' defines the props our MatchCard component accepts.
-// Notice the 'onSelect' line. This is the contract that was missing.
 type MatchCardProps = {
   match: Match;
   selected: string;
-  onSelect: (matchId: string, selection:string) => void;
+  onSelect: (matchId: string, selection: string) => void;
 };
 
 const MatchCard = ({ match, selected, onSelect }: MatchCardProps) => {
   return (
     <View style={styles.card}>
-      {/* Top section with team names and logos */}
       <View style={styles.teamsContainer}>
         <View style={styles.team}>
           <Image source={{ uri: match.teamA.logo }} style={styles.logo} />
           <Text style={styles.teamName} numberOfLines={2}>{match.teamA.name}</Text>
         </View>
         <View style={styles.statusContainer}>
+          <Text style={styles.leagueName} numberOfLines={2}>{match.league.name}</Text>
           <Text style={styles.statusText}>{match.status}</Text>
         </View>
         <View style={styles.team}>
@@ -43,13 +45,7 @@ const MatchCard = ({ match, selected, onSelect }: MatchCardProps) => {
           <Text style={styles.teamName} numberOfLines={2}>{match.teamB.name}</Text>
         </View>
       </View>
-
-      {/* Bottom section with prediction buttons */}
       <View style={styles.predictionContainer}>
-        {/*
-          The onPress handlers now use the 'onSelect' function passed
-          down from the parent screen (league.tsx).
-        */}
         <Pressable
           style={[styles.button, selected === 'teamA' && styles.selectedButton]}
           onPress={() => onSelect(match.id, 'teamA')}
@@ -73,7 +69,6 @@ const MatchCard = ({ match, selected, onSelect }: MatchCardProps) => {
   );
 };
 
-// ... (styles remain the same)
 const styles = StyleSheet.create({
   card: {
     backgroundColor: 'white',
@@ -110,6 +105,14 @@ const styles = StyleSheet.create({
   },
   statusContainer: {
     alignItems: 'center',
+    paddingHorizontal: 10,
+  },
+  leagueName: {
+    fontSize: 10,
+    color: '#666',
+    fontWeight: '500',
+    textAlign: 'center',
+    marginBottom: 4,
   },
   statusText: {
     fontSize: 14,
